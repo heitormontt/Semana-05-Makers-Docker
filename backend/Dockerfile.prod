@@ -1,0 +1,23 @@
+# Usa a versão Alpine, que é muito mais leve
+FROM python:3.12-alpine
+
+# Define a pasta de trabalho
+WORKDIR /app
+
+# Copia e instala as dependências
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+# O Gunicorn é o servidor de produção exigido no guião
+RUN pip install gunicorn 
+
+# Copia o código da aplicação
+COPY . .
+
+# Cria um utilizador sem privilégios root por motivos de segurança
+RUN adduser -D appuser && chown -R appuser /app
+USER appuser
+
+EXPOSE 8000
+
+# Executa com Gunicorn em vez do runserver normal
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
