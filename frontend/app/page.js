@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Itens da Semana 5</h1>
+      <h1>Itens da Semana 5 (Versão B)</h1>
       <p style={{ color: 'blue', fontWeight: 'bold' }}>Diagnóstico: {debug}</p>
       <ul>
         {data.items.length === 0 && <li style={{ color: 'red' }}>A coleção foi lida, mas não tem nenhum documento chamado "items" com dados.</li>}
