@@ -101,3 +101,53 @@ jobs:
         run: cd frontend && npm install
       - name: Executar Testes
         run: cd frontend && npm test || echo "Sem testes definidos, a ignorar por agora..."
+
+# ==========================================
+  # DEPLOY CONTÍNUO (GHCR)
+  # ==========================================
+  deploy-backend:
+    needs: test-backend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Autenticação no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build e Push do Backend
+        run: |
+          # Converte o nome do repositório para minúsculas (exigência do Docker)
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE=ghcr.io/$REPO-backend
+          
+          docker build -f backend/Dockerfile.prod -t $IMAGE:latest -t $IMAGE:${{ github.sha }} ./backend
+          docker push $IMAGE:latest
+          docker push $IMAGE:${{ github.sha }}
+
+  deploy-frontend:
+    needs: test-frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Autenticação no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build e Push do Frontend
+        run: |
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE=ghcr.io/$REPO-frontend
+          
+          docker build -f frontend/Dockerfile.prod -t $IMAGE:latest -t $IMAGE:${{ github.sha }} ./frontend
+          docker push $IMAGE:latest
+          docker push $IMAGE:${{ github.sha }}
