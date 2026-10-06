@@ -33,3 +33,4 @@ ENV PORT 3000
 
 # Executa o ficheiro gerado pelo standalone
 CMD ["node", "server.js"]
+# COPY --from=builder /app/public ./public
